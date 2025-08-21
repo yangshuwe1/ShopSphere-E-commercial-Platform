@@ -1,36 +1,156 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Video Analyzer App
 
-## Getting Started
+Full‑stack application with a Next.js 15 frontend (App Router, React 19, Tailwind v4) and an Express 5 + MongoDB backend. The backend provides authentication (JWT via httpOnly cookie), product catalog APIs, and a contact form endpoint. The frontend implements pages for browsing products, viewing product details, registering, logging in, and adding products for sellers.
 
-First, run the development server:
+### Tech Stack
+- Frontend: Next.js 15, React 19, TypeScript, Tailwind CSS v4
+- Backend: Express 5, Mongoose 8, JWT (httpOnly cookies), Helmet, CORS
+- Database: MongoDB (Atlas or local)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Quick Start
+
+### 1) Prerequisites
+- Node.js 18+ and npm
+- A MongoDB connection string (MongoDB Atlas or local)
+
+### 2) Environment variables
+Create a `.env` file inside `backend/` with:
+
+```
+PORT=4000
+MONGODB_URI=mongodb://127.0.0.1:27017/video_analyzer
+JWT_SECRET=replace-with-a-strong-random-secret
+COOKIE_NAME=auth_token
+NODE_ENV=development
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3) Install dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# at repo root (frontend)
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# backend
+cd backend
+npm install
+```
 
-## Learn More
+### 4) Run locally
 
-To learn more about Next.js, take a look at the following resources:
+Run backend first (port 4000 by default):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cd backend
+node index.js
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+In a new terminal, run the Next.js dev server (port 3000):
 
-## Deploy on Vercel
+```bash
+cd ..
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open `http://localhost:3000`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Project Structure
+
+```
+video-analyzer-app/
+  backend/
+    index.js                # Express app entry
+    middleware/auth.js      # Cookie-based JWT parsing and guards
+    models/                 # Mongoose models: User, Product, Contact
+    routes/                 # Auth, products, contacts APIs
+    package.json
+  src/app/                  # Next.js App Router
+    providers/AuthProvider.tsx   # Client auth state from /api/auth/me
+    products/               # Products listing, detail, and add product page
+    login/, register/       # Auth pages
+    ...components           # UI components
+  package.json              # Frontend scripts
+  README.md
+```
+
+---
+
+## Scripts
+
+Frontend (run from repo root):
+
+```bash
+npm run dev      # next dev (turbopack)
+npm run build    # next build
+npm run start    # next start
+npm run lint     # next lint
+```
+
+Backend (run from backend/):
+
+```bash
+node index.js    # start API server
+```
+
+---
+
+## Backend API
+
+Base URL: `http://localhost:4000`
+
+### Auth (`/api/auth`)
+- `POST /api/auth/register` — body: `{ email, password, name? }`
+- `POST /api/auth/login` — body: `{ email, password }` — sets httpOnly cookie `${COOKIE_NAME}`
+- `POST /api/auth/logout` — clears cookie
+- `GET /api/auth/me` — returns current token payload `{ sub, email, role }` if authenticated
+- `POST /api/auth/role` — update role; self can become `seller`, admin can change any user; body: `{ email?, role }`
+
+### Products (`/api/products`)
+- `GET /api/products` — query params: `q, page, pageSize, sort(newest|price_asc|price_desc), minPrice, maxPrice, category, brand`
+- `GET /api/products/:id`
+- `POST /api/products` — auth required, role `seller` or `admin`; body includes `title, description, price, images?, stock?, featured?, category?, brand?`
+- `PUT /api/products/:id` — owner or `admin`
+- `DELETE /api/products/:id` — owner or `admin`
+
+### Contacts (`/api/contacts`)
+- `POST /api/contacts` — public; `{ name, email, subject, message, phone?, country? }`
+- `GET /api/contacts` — admin only
+- `PATCH /api/contacts/:id` — admin only; `{ status }` where `status ∈ {new, resolved}`
+
+---
+
+## Frontend Usage
+
+- Authentication uses backend cookies. The client reads session via `AuthProvider` calling `/api/auth/me`.
+- Pages:
+  - `/products` — list, search, filter, paginate; featured carousel
+  - `/products/[id]` — details page
+  - `/products/add` — create product (requires `seller` or `admin`)
+  - `/login`, `/register`
+
+To enable creating products as a new user, register, login, then hit the “Become seller” action on the Add Product page (sends `POST /api/auth/role` with `role: seller`).
+
+---
+
+## Configuration Notes
+
+- CORS is restricted to `http://localhost:3000` by default; adjust in `backend/index.js` if needed.
+- JWT secret and MongoDB URI must be set in `backend/.env`.
+- Cookie name can be customized via `COOKIE_NAME`.
+
+---
+
+## Deployment
+
+- Backend: deploy `backend/` to your Node host (set env vars, run `node index.js`).
+- Frontend: run `npm run build` at repo root and deploy `.next` output on your platform (e.g., Vercel). Point the frontend to the backend base URL or expose the backend at `https://your-domain` with proper CORS and `secure` cookies.
+
+---
+
+## License
+
+MIT (or your choice). Update this section if different.
+
