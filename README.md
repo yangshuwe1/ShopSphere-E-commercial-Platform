@@ -1,4 +1,4 @@
-## Video Analyzer App
+## ShopSphere-E-commercial-Platform
 
 Full‑stack application with a Next.js 15 frontend (App Router, React 19, Tailwind v4) and an Express 5 + MongoDB backend. The backend provides authentication (JWT via httpOnly cookie), product catalog APIs, and a contact form endpoint. The frontend implements pages for browsing products, viewing product details, registering, logging in, and adding products for sellers.
 
@@ -20,7 +20,7 @@ Create a `.env` file inside `backend/` with:
 
 ```
 PORT=4000
-MONGODB_URI=mongodb://127.0.0.1:27017/video_analyzer
+MONGODB_URI=mongodb://127.0.0.1:27017/ShopSphere-E-commercial-Platform
 JWT_SECRET=replace-with-a-strong-random-secret
 COOKIE_NAME=auth_token
 NODE_ENV=development
@@ -60,7 +60,7 @@ Open `http://localhost:3000`.
 ## Project Structure
 
 ```
-video-analyzer-app/
+ShopSphere-E-commercial-Platform/
   backend/
     index.js                # Express app entry
     middleware/auth.js      # Cookie-based JWT parsing and guards
